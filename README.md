@@ -55,7 +55,6 @@
       padding: 5px;
     }
 
-    /* Button styling */
     button {
       padding: 8px 15px;
       background-color: #4CAF50; /* Green */
@@ -70,7 +69,6 @@
       background-color: #45a049;
     }
 
-    /* Close button styling */
     .close-btn {
       background-color: #f44336; /* Red */
     }
@@ -79,7 +77,6 @@
       background-color: #e53935;
     }
 
-    /* Remove button styling */
     .remove-btn {
       background-color: #ff9800; /* Orange */
     }
@@ -88,29 +85,11 @@
       background-color: #f57c00;
     }
 
-    /* Add comment button styling */
-    .add-comment-btn {
-      background-color: #4CAF50; /* Green */
-    }
-
-    .add-comment-btn:hover {
-      background-color: #45a049;
-    }
-
-    /* Flexbox for button container */
     .button-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-top: 15px;
-    }
-
-    .button-container button {
-      flex: 1;
-    }
-
-    .button-container .close-btn {
-      margin-left: auto;
     }
   </style>
 </head>
@@ -126,7 +105,6 @@
     document.addEventListener("mouseup", () => {
       const selectedText = window.getSelection().toString();
 
-      // Only proceed if some text is selected
       if (selectedText) {
         const selectionRange = window.getSelection().getRangeAt(0);
         const span = document.createElement("span");
@@ -143,8 +121,12 @@
         icon.title = "View Comments";
         span.appendChild(icon);
 
-        // Add the span to the list of highlighted spans
         highlightedSpans.push(span);
+
+        // Attach click event to the comment icon
+        icon.addEventListener("click", () => {
+          showComments(span);
+        });
 
         // Automatically open the comment box when text is selected
         showComments(span);
@@ -154,19 +136,20 @@
     // Function to show the comment box for a highlighted span
     function showComments(span) {
       const existingCommentBox = document.querySelector(`[data-span-id="${span.dataset.id}"]`);
-      const commentBoxOpened = span.dataset.commentBoxOpened === "true";
 
-      // If the comment box is already open, toggle it (close it)
-      if (commentBoxOpened) {
-        closeComments(span);
-        return;
-      }
+      if (existingCommentBox) {
+        existingCommentBox.style.display = "block"; // Show the existing comment box
 
-      // Create a new comment box
-      if (!existingCommentBox) {
+        // Load and display existing comments from the span's dataset
+        const commentsList = existingCommentBox.querySelector(".comments-list");
+        const existingComments = JSON.parse(span.dataset.comments);
+        commentsList.innerHTML = existingComments
+          .map(comment => `<li>${comment}</li>`)
+          .join("");
+      } else {
         const commentBox = document.createElement("div");
         commentBox.classList.add("comment-box");
-        commentBox.setAttribute('data-span-id', span.dataset.id);
+        commentBox.setAttribute("data-span-id", span.dataset.id);
 
         const commentsList = document.createElement("ul");
         commentsList.classList.add("comments-list");
@@ -186,7 +169,6 @@
         removeButton.textContent = "Remove Highlight";
         removeButton.classList.add("remove-btn");
 
-        // Add buttons to the container (buttons at the bottom)
         const buttonContainer = document.createElement("div");
         buttonContainer.classList.add("button-container");
 
@@ -207,20 +189,14 @@
           .join("");
 
         removeButton.onclick = () => {
-          // Remove the highlight and comment icon, but leave the text
           span.classList.remove("highlight");
           const icon = span.querySelector(".comment-icon");
           if (icon) icon.remove();
-
-          // Remove the comment box from the DOM
           commentBox.remove();
-
-          // Remove the comment box opened state
-          delete span.dataset.commentBoxOpened;
         };
 
         closeButton.onclick = () => {
-          closeComments(span);
+          commentBox.style.display = "none"; // Hide the comment box temporarily
         };
 
         addCommentButton.onclick = () => {
@@ -237,39 +213,8 @@
             newCommentTextarea.value = "";
           }
         };
-
-        // Mark this span as having its comment box opened
-        span.dataset.commentBoxOpened = "true";
-      }
-    }
-
-    // Function to close the comment box (hide it temporarily)
-    function closeComments(span) {
-      const commentBox = document.querySelector(`[data-span-id="${span.dataset.id}"]`);
-      if (commentBox) {
-        commentBox.style.display = "none"; // Hide the comment box temporarily
-        span.dataset.commentBoxOpened = "false"; // Mark the comment box as closed
       }
     }
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
